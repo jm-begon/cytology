@@ -1,0 +1,16 @@
+groovy -cp "lib/*" union2.groovy  CYTOMINE_HOST CYTOMINE_USERJOB_PUBKEY CYTOMINE_USERJOB_PRIVATEKEY IMAGE USER TERM MININTERSECT BUFFER
+
+
+Exemple:
+groovy -cp "lib/*" union2.groovy  http://localhost:8080 652f552c-4443-4c6e-b74a-327bc07b0103 f90950e8-244a-4d27-9ebd-47ade10a9ad4 21904844 22103187 20202 10 20
+
+
+groovy -cp "lib/*" union2.groovy  http://beta.cytomine.be 652f552c-4443-4c6e-b74a-327bc07b0103 f90950e8-244a-4d27-9ebd-47ade10a9ad4 24089018 26852896 8171841 10 20
+
+
+groovy -cp "lib/*" union2.groovy  http://localhost:8080 652f552c-4443-4c6e-b74a-327bc07b0103 f90950e8-244a-4d27-9ebd-47ade10a9ad4 21904844 22103187 20202 10 20
+
+
+groovy -cp "lib/*" union2.groovy  http://localhost:8080 29f51819-3dc6-468c-8aa7-9c81b9bc236b db214699-0384-498c-823f-801654238a67 16801 16 6443 10 20 5000 500 2000
+
+groovy -cp "lib/*" union2.groovy  http://localhost:8080 29f51819-3dc6-468c-8aa7-9c81b9bc236b db214699-0384-498c-823f-801654238a67 16801 16 6443 10 20 100 20 30
