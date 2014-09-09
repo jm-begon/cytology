@@ -5,7 +5,7 @@
 # Linux:
 #   sudo sysctl -w kernel.shmmax=500000000
 #   sudo sysctl -p /etc/sysctl.conf
-
+# 3/9
 import cPickle as pickle
 import numpy as np
 
