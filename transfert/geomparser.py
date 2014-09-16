@@ -12,10 +12,16 @@ def parse_file(filepath):
     tile_mapper = TileMapper(104704, 172032, 4096, 4096)
     nb_geom = 0
     with open(filepath, "r") as f:
-        for tile in tile_mapper:
-            tile_info = f.readline().split(" ")
-            nb_geom += tile_info[5]
-            for index in tile_info[5]:
+        while True:
+            line = f.readline()
+            if not line:
+                break
+            tile_info = line.split(" ")
+            x = int(tile_info[1])
+            y = int(tile_info[2])
+            tile = tile_mapper.get_tile_by_corner(x, y)
+            nb_geom += int(tile_info[5])
+            for index in range(int(tile_info[5])):
                 tile.add_geometry(loads(f.readline()))
 
     print "Nb of geometries (before union) : ", nb_geom
@@ -31,7 +37,10 @@ if __name__ == "__main__":
 
     nb_geom = 0
     for tile in tile_mapper:
-        nb_geom += len(tile.entries)
+        for tile_entry in tile.entries:
+            if tile_entry.patent:
+                nb_geom += 1
+
 
     print "Nb of geometries (after union) : ", nb_geom
 

@@ -5,22 +5,24 @@ Created on Tue Sep 09 09:59:17 2014
 @author: Jm Begon
 """
 
-from shapely import union
+#from shapely.geometry.base import  BaseGeometry as bg
 
 
 def merge_on_intersect(geometry1, geometry2):
-    if geometry1.intersect(geometry2):
-        return union(geometry1, geometry2)
+    if geometry1.intersects(geometry2):
+#        return bg.union(geometry1, geometry2)
+        pass
     return None
 
 
-def _union(current_tile, border_geometries, neighbor_tile):
+def _union(current_tile, border_geometries,
+           neighbor_tile, border_geometries_neighbor):
     if not neighbor_tile:
         return
 
     for index in border_geometries:
         local_geometry = current_tile.get(index)
-        for index2 in neighbor_tile:
+        for index2 in border_geometries_neighbor:
             neighbor_geometry = neighbor_tile.get(index2)
             new_geometry = merge_on_intersect(local_geometry,
                                               neighbor_geometry)
@@ -35,33 +37,41 @@ def merge_annotations(tile_mapper):
         #East
         border_geometries = tile.east
         neighbor_tile = tile._east_tile
-        _union(tile, border_geometries, neighbor_tile)
+        if neighbor_tile:
+            _union(tile, border_geometries, neighbor_tile,
+                   neighbor_tile.west)
 
         #South East
         border_geometries = tile.southeast
         neighbor_tile = tile._southeast_tile
-        _union(tile, border_geometries, neighbor_tile)
+        if neighbor_tile:
+            _union(tile, border_geometries, neighbor_tile,
+                   neighbor_tile.northwest)
 
         #South
         border_geometries = tile.south
         neighbor_tile = tile._south_tile
-        _union(tile, border_geometries, neighbor_tile)
+        if neighbor_tile:
+            _union(tile, border_geometries, neighbor_tile,
+                   neighbor_tile.north)
 
         #South West
         border_geometries = tile.southwest
         neighbor_tile = tile._southwest_tile
-        _union(tile, border_geometries, neighbor_tile)
+        if neighbor_tile:
+            _union(tile, border_geometries, neighbor_tile,
+                   neighbor_tile.northeast)
 
 
 class TileEntry:
 
     def __init__(self, geometry):
         self.geometry = geometry
-        self.pattern = True
+        self.pattent = True
 
-    def setGeometry(self, geometry, pattern=True):
+    def setGeometry(self, geometry, pattent=True):
         self.geometry = geometry
-        self.pattern = pattern
+        self.pattent = pattent
 
 
 class Tile:
@@ -87,6 +97,7 @@ class Tile:
         self.south = []
         self.southwest = []
         self.west = []
+        self.northwest= []
 
     def __repr__(self):
         return str((self.x, self.y, self.height, self.width))
@@ -126,14 +137,13 @@ class Tile:
         if touches_west:
             self.west.append(gid)
 
-        self.entries.append(TileEntry(geometry, touches_north, touches_east,
-                                      touches_south, touches_west))
+        self.entries.append(TileEntry(geometry))
 
     def get(self, index):
         return self.entries[index].geometry
 
-    def setGeometry(self, index, geometry, pattern=True):
-        self.entries[index].setGeometry(geometry, pattern)
+    def setGeometry(self, index, geometry, pattent=True):
+        self.entries[index].setGeometry(geometry, pattent)
 
 
 class TileMapper:
@@ -183,8 +193,16 @@ class TileMapper:
             for col in xrange(nb_columns):
                 if row > 0:
                     self.tiles[row][col]._north_tile = self.tiles[row-1][col]
+                    if col > 0:
+                        self.tiles[row][col]._northwest_tile = self.tiles[row-1][col-1]
+                    if col < nb_columns - 1:
+                        self.tiles[row][col]._northeast_tile = self.tiles[row-1][col+1]
                 if row < nb_rows - 1:
                     self.tiles[row][col]._south_tile = self.tiles[row+1][col]
+                    if col > 0:
+                        self.tiles[row][col]._southwest_tile = self.tiles[row+1][col-1]
+                    if col < nb_columns - 1:
+                        self.tiles[row][col]._southeast_tile = self.tiles[row+1][col+1]
                 if col > 0:
                     self.tiles[row][col]._west_tile = self.tiles[row][col-1]
                 if col < nb_columns - 1:
@@ -198,6 +216,11 @@ class TileMapper:
 
     def get(self, row, column):
         return self.tiles[row][column]
+
+    def get_tile_by_corner(self, x, y):
+        col = x // self.tile_wdith
+        row = y // self.tile_height
+        return self.tiles[row][col]
 
 
 class RowOrderIterator:
